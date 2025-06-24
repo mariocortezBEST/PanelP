@@ -315,7 +315,7 @@
         <!-- Nivel 2: Sub-ramificaciones -->
         <div class="level hidden" id="level-2-creational">
             <div class="node node-question">¿Necesitas crear objetos sin especificar sus clases concretas?</div>
-            <div id="q-creational-family" class="node clickable" data-target="q-abstract-factory">Sí, necesito familias de objetos relacionados.</div>
+            <div id="q-creational-family" class="node clickable" data-target="p-abstract-factory">Sí, necesito familias de objetos relacionados.</div>
             <div id="q-creational-subclass" class="node clickable" data-target="p-factory-method">Sí, quiero que las subclases decidan qué crear.</div>
             <div id="q-creational-clone" class="node clickable" data-target="p-prototype">Sí, quiero clonar un objeto existente.</div>
             <div class="node node-question">Otras opciones creacionales:</div>
@@ -722,6 +722,10 @@ document.addEventListener('DOMContentLoaded', () => {
             nodeElement.classList.remove('hidden');
             const sourceNode = document.getElementById(sourceNodeId);
             drawLine(sourceNode, nodeElement);
+            if (nodeElement.classList.contains('node-pattern')) {
+                selectNode(nodeElement);
+                showInfoPanel(nodeId, 'diagram');
+            }
         }
     }
     
