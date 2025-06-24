@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Mental con Canvas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        canvas {
+            background-color: #16213e;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="mindmapCanvas" width="1000" height="800"></canvas>
+
+    <script>
+        // Espera a que la fuente personalizada se cargue antes de dibujar
+        document.fonts.ready.then(() => {
+            const canvas = document.getElementById('mindmapCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Configuración de colores y fuentes (similar a las variables CSS)
+            const colors = {
+                bg: '#16213e',
+                text: '#e3e3e3',
+                line: '#a9a9a9',
+                style: '#e94560',
+                arch: '#16c79a',
+                design: '#f9a826',
+                centerNode: '#0f3460'
+            };
+            const FONT = 'Poppins';
+
+            // --- Funciones de Utilidad para Dibujar ---
+
+            // Dibuja un rectángulo con bordes redondeados
+            function drawRoundedRect(x, y, width, height, radius) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+            }
+
+            // Dibuja texto con alineación y color
+            function drawText(text, x, y, color, size, align = 'center', weight = 'normal') {
+                ctx.fillStyle = color;
+                ctx.font = `${weight} ${size}px ${FONT}`;
+                ctx.textAlign = align;
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x, y);
+            }
+            
+            // Dibuja una flecha curva usando una curva de Bézier
+            function drawCurvedArrow(startX, startY, endX, endY, cp1x, cp1y, color) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                
+                // Dibuja la línea curva
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.quadraticCurveTo(cp1x, cp1y, endX, endY);
+                ctx.stroke();
+
+                // Dibuja la punta de la flecha
+                const angle = Math.atan2(endY - cp1y, endX - cp1x);
+                ctx.save();
+                ctx.translate(endX, endY);
+                ctx.rotate(angle);
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-10, -5);
+                ctx.lineTo(-10, 5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // --- Funciones para Dibujar los Componentes del Mapa ---
+
+            function drawNode(config) {
+                // Dibuja el cuerpo del nodo
+                ctx.fillStyle = colors.bg;
+                drawRoundedRect(config.x, config.y, config.w, config.h, 10);
+                ctx.fill();
+                
+                // Dibuja el borde superior
+                ctx.strokeStyle = config.borderColor;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(config.x, config.y);
+                ctx.lineTo(config.x + config.w, config.y);
+                ctx.stroke();
+
+                // Dibuja el título con icono
+                drawText(config.icon, config.x + 35, config.y + 35, colors.text, 18, 'left', '600');
+                drawText(config.title, config.x + 60, config.y + 35, colors.text, 18, 'left', '600');
+                
+                // Dibuja la descripción (metáfora)
+                drawText(config.meta, config.x + config.w / 2, config.y + 65, colors.text, 13);
+
+                // Dibuja los ítems de la lista
+                let itemY = config.y + 100;
+                config.items.forEach(item => {
+                    if (item.isHeader) {
+                        itemY += 15;
+                        drawText(item.text, config.x + 25, itemY, config.borderColor, 14, 'left', '600');
+                        itemY += 25;
+                    } else {
+                        drawText(item.icon, config.x + 35, itemY, colors.text, 16, 'left');
+                        drawText(item.text, config.x + 60, itemY, colors.text, 15, 'left');
+                        itemY += 30;
+                    }
+                });
+            }
+
+
+            // --- Función Principal de Dibujo ---
+            function drawMindMap() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 1. Dibuja las conexiones (flechas)
+                drawCurvedArrow(420, 550, 250, 380, 300, 450, colors.arch);
+                drawCurvedArrow(750, 380, 580, 550, 700, 450, colors.design);
+
+                // 2. Dibuja el nodo central
+                ctx.fillStyle = colors.centerNode;
+                ctx.strokeStyle = colors.style;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(500, 250, 80, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                drawText('🧠', 500, 225, colors.text, 30);
+                drawText('La Matriz del Diseño', 500, 260, colors.text, 16);
+                drawText('de Software', 500, 285, colors.text, 16);
+
+                // 3. Define la configuración de cada nodo
+                const styleNode = {
+                    x: 50, y: 350, w: 300, h: 200, icon: '🏙️', title: 'Estilos Arquitectónicos',
+                    meta: 'Visión global (Esquema urbano)', borderColor: colors.style,
+                    items: [
+                        { icon: '🏢', text: 'Monolítico' },
+                        { icon: '🏘️', text: 'Microservicios' },
+                        { icon: '📡', text: 'Cliente-Servidor' }
+                    ]
+                };
+
+                const archNode = {
+                    x: 350, y: 500, w: 300, h: 220, icon: '📜', title: 'Patrones Arquitectónicos',
+                    meta: 'Estructura y organización (Planos)', borderColor: colors.arch,
+                    items: [
+                        { icon: '🧱', text: 'En Capas (Layered)' },
+                        { icon: '🔗', text: 'MVC' },
+                        { icon: '칠', text: 'Blackboard' },
+                        { icon: '⚡', text: 'Orientado a Eventos' }
+                    ]
+                };
+                
+                const designNode = {
+                    x: 650, y: 350, w: 300, h: 280, icon: '⚙️', title: 'Patrones de Diseño',
+                    meta: 'Soluciones a nivel de código', borderColor: colors.design,
+                    items: [
+                        { text: 'Creacionales', isHeader: true },
+                        { icon: '🏭', text: 'Singleton, Factory, Builder' },
+                        { text: 'Estructurales', isHeader: true },
+                        { icon: '🌉', text: 'Adapter, Decorator, Facade' },
+                        { text: 'Comportamiento', isHeader: true },
+                        { icon: '▶️', text: 'Strategy, Observer, Command' },
+                    ]
+                };
+                
+                // 4. Dibuja cada nodo
+                drawNode(styleNode);
+                drawNode(archNode);
+                drawNode(designNode);
+            }
+
+            drawMindMap();
+        });
+    </script>
+</body>
+</html>

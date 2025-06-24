@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol de Decisión: Patrones de Diseño</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: #1c1e21;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            border-bottom: none;
+        }
+
+        .step {
+            margin-bottom: 30px;
+        }
+
+        .question {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .options .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1em;
+            text-align: left;
+            background-color: #e7f3ff;
+            color: #0056b3;
+            border: 1px solid #b3d7ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .options .btn:hover {
+            background-color: #d0e8ff;
+            transform: translateY(-2px);
+        }
+
+        .btn strong {
+            color: #004a99;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-card {
+            margin-top: 20px;
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid;
+        }
+
+        #resultBuilder { border-color: #28a745; background-color: #f0fff4; }
+        #resultAdapter { border-color: #fd7e14; background-color: #fff8f0; }
+        #resultChain   { border-color: #6f42c1; background-color: #f8f5ff; }
+
+        .result-card h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        
+        .result-card ul {
+            padding-left: 20px;
+        }
+        
+        .result-card li {
+            margin-bottom: 10px;
+        }
+
+        .btn-confirm {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-confirm:hover {
+            background-color: #218838;
+        }
+
+        #resetBtn {
+            display: block;
+            margin: 30px auto 0;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        
+        #resetBtn:hover {
+            background-color: #5a6268;
+        }
+        
+        .final-notes {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Selector de Patrones de Diseño</h1>
+        <p style="text-align:center; color: #666;">Responde a las preguntas para encontrar el patrón más adecuado para tu problema.</p>
+
+        <div id="step1" class="step">
+            <p class="question">Paso 1: ¿Cuál es la naturaleza principal del problema que intentas resolver?</p>
+            <div class="options">
+                <button class="btn" onclick="selectPath('A')">
+                    <strong>A. Problemas de Creación:</strong> Relacionados con la creación de objetos complejos o la construcción de diferentes representaciones.
+                </button>
+                <button class="btn" onclick="selectPath('B')">
+                    <strong>B. Problemas de Estructura:</strong> Relacionados con la composición de clases, especialmente la colaboración entre interfaces incompatibles.
+                </button>
+                <button class="btn" onclick="selectPath('C')">
+                    <strong>C. Problemas de Comportamiento:</strong> Relacionados con la comunicación entre objetos, donde las solicitudes son gestionadas por varios posibles receptores.
+                </button>
+            </div>
+        </div>
+
+        <div id="step2A" class="step hidden">
+            <p class="question">Paso 2.A: ¿Necesitas construir un objeto complejo paso a paso, con muchos campos opcionales, o producir diferentes representaciones de un objeto empleando el mismo código de construcción?</p>
+            <button class="btn-confirm" onclick="showResult('Builder')">Sí, esto describe mi problema.</button>
+        </div>
+
+        <div id="step2B" class="step hidden">
+            <p class="question">Paso 2.B: ¿Tienes una clase con una interfaz incompatible con el resto de tu código y necesitas que colabore sin modificar su código fuente?</p>
+            <button class="btn-confirm" onclick="showResult('Adapter')">Sí, esto describe mi problema.</button>
+        </div>
+
+        <div id="step2C" class="step hidden">
+            <p class="question">Paso 2.C: ¿Necesitas que una cadena de objetos intente gestionar una petición hasta que uno la procese, desacoplando al emisor del receptor?</p>
+            <button class="btn-confirm" onclick="showResult('Chain')">Sí, esto describe mi problema.</button>
+        </div>
+
+        <div id="result-area">
+            <div id="resultBuilder" class="result-card hidden">
+                <h3>Patrón Sugerido: Builder (Constructor)</h3>
+                <p><strong>¿Por qué Builder?</strong> Este patrón es ideal para evitar "constructores telescópicos" y te permite construir objetos complejos paso a paso, utilizando solo las configuraciones que necesitas.</p>
+                <ul>
+                    <li>Permite reutilizar el mismo código de construcción para crear diferentes representaciones del producto.</li>
+                    <li>Desacopla el código de construcción complejo de la lógica de negocio principal del producto (Principio de Responsabilidad Única).</li>
+                    <li>Puedes implementar validaciones durante el proceso de construcción antes de que el objeto final sea creado.</li>
+                    <li>La clase <em>Directora</em> puede definir el orden de los pasos, encapsulando las rutinas para su reutilización.</li>
+                </ul>
+            </div>
+
+            <div id="resultAdapter" class="result-card hidden">
+                <h3>Patrón Sugerido: Adapter (Adaptador, Wrapper)</h3>
+                <p><strong>¿Por qué Adapter?</strong> Su propósito es permitir la colaboración entre objetos con interfaces incompatibles, creando un objeto especial que convierte la interfaz de uno para que otro pueda entenderla.</p>
+                <ul>
+                    <li>El adaptador envuelve al objeto existente, y el objeto envuelto ni siquiera es consciente del adaptador.</li>
+                    <li>Es útil cuando no puedes modificar la librería existente (por ejemplo, código de terceros o heredado).</li>
+                    <li>Ayuda a objetos con distintas interfaces a colaborar, no solo convierte formatos de datos.</li>
+                    <li>Se adhiere al Principio de Responsabilidad Única (separa la conversión de la lógica) y al Principio de Abierto/Cerrado (puedes añadir nuevos adaptadores sin romper el código cliente).</li>
+                </ul>
+            </div>
+
+            <div id="resultChain" class="result-card hidden">
+                <h3>Patrón Sugerido: Chain of Responsibility (Cadena de Responsabilidad)</h3>
+                <p><strong>¿Por qué Chain of Responsibility?</strong> Te permite pasar solicitudes a lo largo de una cadena de manejadores. Cada manejador decide si procesa la solicitud o si la pasa al siguiente.</p>
+                <ul>
+                    <li>Desacopla las clases que invocan operaciones de las que las realizan.</li>
+                    <li>Es útil para una serie de comprobaciones o procesamiento secuencial, evitando código abotargado.</li>
+                    <li>Puedes controlar el orden de procesamiento y modificar dinámicamente la cadena de manejadores en tiempo de ejecución.</li>
+                    <li>Todos los manejadores implementan una interfaz común, permitiendo que la solicitud se envíe a cualquier punto de la cadena.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <button id="resetBtn" class="hidden" onclick="reset()">Comenzar de Nuevo</button>
+
+        <div class="final-notes">
+            <h2>Consideraciones Adicionales</h2>
+            <ul>
+                <li><strong>Otros Patrones:</strong> Existen muchos otros patrones. Este árbol se enfoca en los más detallados en las fuentes originales (Builder, Adapter, Chain of Responsibility).</li>
+                <li><strong>Complejidad:</strong> Implementar un patrón de diseño a menudo introduce nuevas clases e interfaces. Evalúa siempre si el problema justifica esta complejidad adicional.</li>
+                <li><strong>Práctica:</strong> Identificar el patrón correcto es una habilidad que se desarrolla con la experiencia.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Obtener referencias a los elementos del DOM
+        const step1 = document.getElementById('step1');
+        const step2A = document.getElementById('step2A');
+        const step2B = document.getElementById('step2B');
+        const step2C = document.getElementById('step2C');
+        const resultBuilder = document.getElementById('resultBuilder');
+        const resultAdapter = document.getElementById('resultAdapter');
+        const resultChain = document.getElementById('resultChain');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const allStep2s = [step2A, step2B, step2C];
+        const allResults = [resultBuilder, resultAdapter, resultChain];
+
+        function hideAllSecondary() {
+            allStep2s.forEach(el => el.classList.add('hidden'));
+            allResults.forEach(el => el.classList.add('hidden'));
+        }
+
+        function selectPath(path) {
+            hideAllSecondary();
+            step1.classList.add('hidden'); // Oculta el paso 1 para evitar confusión
+
+            if (path === 'A') {
+                step2A.classList.remove('hidden');
+            } else if (path === 'B') {
+                step2B.classList.remove('hidden');
+            } else if (path === 'C') {
+                step2C.classList.remove('hidden');
+            }
+            
+            resetBtn.classList.remove('hidden');
+        }
+
+        function showResult(pattern) {
+            hideAllSecondary();
+            
+            if (pattern === 'Builder') {
+                resultBuilder.classList.remove('hidden');
+            } else if (pattern === 'Adapter') {
+                resultAdapter.classList.remove('hidden');
+            } else if (pattern === 'Chain') {
+                resultChain.classList.remove('hidden');
+            }
+        }
+
+        function reset() {
+            hideAllSecondary();
+            step1.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
+        }
+
+        // Inicializar la vista
+        document.addEventListener('DOMContentLoaded', reset);
+    </script>
+
+</body>
+</html>
